@@ -4,17 +4,20 @@
 # publish a GitHub Release with the installer, each rulebook, the READMEs and their SHA-256 and MD5 sums
 # (SHA256SUMS, MD5SUMS, and in the release notes). A push that keeps the version does nothing. The ParlorNet
 # docs site fetches the installer and the READMEs from the release at a pinned tag and checks their SHA-256.
+# Run it by hand on main to release a version whose push did not run it.
 name: Release
 
 on:
   push:
     branches: [main]
+  workflow_dispatch:
 
 # One at a time, so two quick landings can't both release the same version
 concurrency: release
 
 jobs:
   release:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
     permissions:
       contents: write
