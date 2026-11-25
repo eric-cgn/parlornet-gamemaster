@@ -1,0 +1,31 @@
+# Every push to main and every pull request: a build (tools/build.sh: the rulebooks with Retro68 in Docker,
+# the installer with EUP) and the tests, with the release files kept as an artifact. A pull request into main
+# fails unless it comes from dev: features go into dev, and main only takes dev, as a release.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Into main only from dev
+        if: github.event_name == 'pull_request' && github.base_ref == 'main' && github.head_ref != 'dev'
+        run: |
+          echo "::error::Pull requests into main come from dev. Point this one at dev instead."
+          exit 1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      - name: Build
+        run: tools/build.sh
+      - name: Test
+        run: python3 -m unittest discover -s tests
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
+        with:
+          name: parlornet-rulebooks
+          path: build/release/

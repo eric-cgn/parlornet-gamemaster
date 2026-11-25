@@ -1,0 +1,23 @@
+ParlorNet Rulebooks 1.4
+
+These are rulebooks for GameMaster 1.0.0, the Macintosh game program of 1991. GameMaster itself is not included.
+
+ParlorNet signs you in to a ParlorNet parlor. From its window you start a game against the bot or another player, take the invitations other players send you, and take up the games you are already playing.
+
+The game rulebooks play these games on a parlor, against the bot or another player. Checkers, Mancala and Five in a Row also play between two Macs with the same rulebook.
+
+Checkers plays by American rules.
+Mancala plays by Kalah rules with four seeds a pit.
+Five in a Row plays on a 15 by 15 board, and five or more in a line wins.
+Grid Words is the crossword game, by the classic rules on the standard board. It plays only on a parlor, which deals the tiles and checks the words.
+Rummy Tile is tile rummy for two by the standard rules. It plays only on a parlor, which deals the tiles and checks every turn.
+Cannon Fire has two tanks shelling each other across a landscape. It plays only on a parlor, which flies the shells.
+Backgammon plays by the standard rules with the doubling cube. It plays only on a parlor, which rolls the dice and checks every turn.
+
+Click Continue. Install Location should name the folder that holds GameMaster; if it does not, click Choose... and pick that folder. The rulebooks go in that folder, next to GameMaster. Then click Install, open GameMaster and choose File > New Game.
+
+GameMaster's own rulebooks stay as they are. Othello, Dots&Boxes and BattleShips play on a parlor with GameMaster's own rulebooks of those names.
+
+The ParlorNet rulebooks are free software under the MIT license; the source and the license are at https://github.com/eric-cgn/parlornet-gamemaster
+
+This installer was made with EUP (https://github.com/eric-cgn/eup). It carries parts of newlib, Multiversal Interfaces, and the Retro68 and GCC runtimes; their notices are in EUP's licenses folder.

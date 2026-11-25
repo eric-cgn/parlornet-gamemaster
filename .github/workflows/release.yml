@@ -1,0 +1,65 @@
+# Every push to main: if rulebooks/installer/rulebooks.ini names an installer version with no release yet,
+# build the rulebooks with tools/build.sh (Retro68 in Docker, pinned by digest) and the installer (EUP at a
+# pinned commit), run the tests, tag the commit v<version> (v1.4 for Install ParlorNet Rulebooks 1.4) and
+# publish a GitHub Release with the installer, each rulebook, the READMEs and their SHA-256 and MD5 sums
+# (SHA256SUMS, MD5SUMS, and in the release notes). A push that keeps the version does nothing. The ParlorNet
+# docs site fetches the installer and the READMEs from the release at a pinned tag and checks their SHA-256.
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+# One at a time, so two quick landings can't both release the same version
+concurrency: release
+
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      - id: version
+        name: A new version?
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          v=$(sed -n 's/^version = //p' rulebooks/installer/rulebooks.ini | head -n 1)
+          echo "VERSION=$v" >> "$GITHUB_ENV"
+          if gh release view "v$v" >/dev/null 2>&1; then
+            echo "Install ParlorNet Rulebooks $v is already released"
+            echo "new=no" >> "$GITHUB_OUTPUT"
+          else
+            echo "new=yes" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Build
+        if: steps.version.outputs.new == 'yes'
+        run: tools/build.sh
+      - name: Test
+        if: steps.version.outputs.new == 'yes'
+        run: python3 -m unittest discover -s tests
+      - name: Release
+        if: steps.version.outputs.new == 'yes'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          notes="$RUNNER_TEMP/notes.md"
+          {
+            echo "Install ParlorNet Rulebooks $VERSION: the ParlorNet rulebook and the seven game rulebooks for GameMaster 1.0.0,"
+            echo "for a Mac Plus or later with System 6.0 or later. Built from this commit by tools/build.sh; the READMEs have"
+            echo "the instructions and the license."
+            echo
+            echo "SHA-256:"
+            echo
+            echo '```'
+            cat build/release/SHA256SUMS
+            echo '```'
+            echo
+            echo "MD5:"
+            echo
+            echo '```'
+            cat build/release/MD5SUMS
+            echo '```'
+          } > "$notes"
+          gh release create "v$VERSION" build/release/* --target "$GITHUB_SHA" --title "Install ParlorNet Rulebooks $VERSION" --notes-file "$notes"
