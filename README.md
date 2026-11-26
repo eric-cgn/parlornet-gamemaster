@@ -15,8 +15,8 @@ They are part of [ParlorNet](https://github.com/eric-cgn/parlornet), a server fo
 | `rulebooks/cannonfire` | Cannon Fire, two tanks shelling each other, on a parlor only (`Cannon Fire [ParlorNet]`) | 1.1.1 |
 | `rulebooks/backgammon` | Backgammon with the doubling cube, on a parlor only (`Backgammon [ParlorNet]`) | 1.1.1 |
 | `rulebooks/common` | the code and the messages the game rulebooks share (`rb.c`, `rb.h`), and GameMaster's `GMRZ` resource type (`GMRZ.r`), which every rulebook here uses | |
-| `rulebooks/installer` | Install ParlorNet Rulebooks: the EUP description (`rulebooks.ini`) and its first screen (`About.txt`) | 1.4 |
-| `release` | the READMEs that come with the downloads | |
+| `rulebooks/installer` | Install ParlorNet Rulebooks: the EUP description (`rulebooks.ini`) and its first screen (`About.txt`) | 1.5 |
+| `release` | the READMEs of the ParlorNet rulebook and the game rulebooks, which ParlorNet's docs site serves with the installer | |
 
 Each rulebook's own README says how it plays, the messages it sends and how its game record is kept.
 
@@ -36,13 +36,13 @@ A change to the messages the rulebooks and the extension exchange needs a change
 
 ## Getting it
 
-The [game rulebooks page](http://docs.parlornet.org/gamemaster-rulebooks.html) of ParlorNet's docs site has Install ParlorNet Rulebooks over plain HTTP, which a period browser can fetch, as `parlornet-rulebooks-installer.hqx` (BinHex) and `.bin` (MacBinary). The [ParlorNet rulebook page](http://docs.parlornet.org/parlornet-rulebook.html) describes the lobby. The same files are on this repository's GitHub Releases with their SHA-256 and MD5 sums, along with each rulebook on its own as `.hqx`, `.bin` and an 800K HFS disk image (`.dsk`) for emulators, and the two READMEs.
+Install ParlorNet Rulebooks comes as three files, and you need only one of them. `parlornet-rulebooks-installer.hqx` is BinHex, for a Mac that decodes BinHex with StuffIt Expander or BinHex 4.0. `parlornet-rulebooks-installer.bin` is MacBinary, for a Mac or a download program that reads MacBinary. `parlornet-rulebooks-installer.dsk` is an 800K HFS disk image holding the installer, for an emulator or for writing a floppy disk.
+
+The [latest release](https://github.com/eric-cgn/parlornet-gamemaster/releases/latest) on GitHub has the three files, and its notes link each one and give its SHA-256. The [game rulebooks page](http://docs.parlornet.org/gamemaster-rulebooks.html) of ParlorNet's docs site has the same files over plain HTTP, which a period browser can fetch. The [ParlorNet rulebook page](http://docs.parlornet.org/parlornet-rulebook.html) describes the lobby. The rulebooks come only in the installer.
 
 ## Installing
 
-Decode the installer with StuffIt Expander or BinHex 4.0 and open it. Its first screen says what it installs. Install Location must name the folder that holds GameMaster; if it does not, click Choose... and pick that folder. Click Install, then open GameMaster and choose File > New Game > ParlorNet. Custom Install picks which rulebooks to install. GameMaster's own rulebooks stay as they are.
-
-A single rulebook can also be decoded from its `.hqx` or `.bin`, or copied from its `.dsk`, into the folder that holds GameMaster.
+Decode the installer with StuffIt Expander or BinHex 4.0, or open the disk image, and open the installer. Its first screen says what it installs. Install Location must name the folder that holds GameMaster; if it does not, click Choose... and pick that folder. Click Install, then open GameMaster and choose File > New Game > ParlorNet. Custom Install picks which rulebooks to install. GameMaster's own rulebooks stay as they are.
 
 ## Building
 
@@ -52,21 +52,21 @@ You need Docker, Python 3, git and a C compiler. The rulebooks are built with [R
 tools/build.sh
 ```
 
-It writes `build/parlornet-rulebook.bin`, `.hqx` and `.dsk`, the same for each game rulebook (`build/checkers-rulebook.bin`, ..., `build/backgammon-rulebook.bin`), and `build/parlornet-rulebooks-installer.bin` and `.hqx`. The dates in the files are set to the release date by `tools/patcher_dates.py`, and the installer's by `SOURCE_DATE_EPOCH`, so the same source always gives the same files; the `.hqx` files are made from the `.bin` files by `tools/binhex4.py`. It also puts the release files in `build/release/`, with `SHA256SUMS` and `MD5SUMS`. `RETRO68_IMAGE` names another toolchain image, and `EUP` an `eup` command to use instead of the pinned one.
+It writes `build/parlornet-rulebook.bin` and the same for each game rulebook (`build/checkers-rulebook.bin`, ..., `build/backgammon-rulebook.bin`), which go into the installer. EUP writes the installer as `build/parlornet-rulebooks-installer.bin` and `.hqx`, and the build script puts it on an 800K HFS disk image, `build/parlornet-rulebooks-installer.dsk`, with the hfsutils of the same Retro68 image. The dates in the rulebooks and on the disk are set to their release dates by `tools/patcher_dates.py`, and the installer's by `SOURCE_DATE_EPOCH`, so the same source always gives the same files. The build also copies the three release files to `build/release/` and prints their SHA-256 sums. `RETRO68_IMAGE` names another toolchain image, and `EUP` an `eup` command to use instead of the pinned one.
 
-`python3 -m unittest discover -s tests` checks the sources, the versions, the build script and the release READMEs, and the built files once `tools/build.sh` has run.
+`python3 -m unittest discover -s tests` checks the sources, the versions, the build script, the workflows and the READMEs in `release/`, and the built files once `tools/build.sh` has run. It checks that the disk image is an 800K HFS volume holding both forks of the installer.
 
 ## Branches and releases
 
-Changes go into `dev` by pull request, squashed; `main` takes only merges from `dev`, which is how a release is made. Every pull request and every push to `main` builds and tests (`.github/workflows/ci.yml`), and a pull request into `main` fails unless it comes from `dev`. Every push to `dev` publishes a `dev` pre-release that replaces the last one, with files named for the installer's version, `-dev-` and the commit, such as `parlornet-rulebooks-installer-1.4-dev-46a0304.hqx` (`.github/workflows/dev.yml`).
+Changes go into `dev` by pull request, squashed; `main` takes only merges from `dev`, which is how a release is made. Every pull request and every push to `dev` or `main` builds and tests (`.github/workflows/ci.yml`) and keeps the three files as a workflow artifact, and a pull request into `main` fails unless it comes from `dev`. Builds of `dev` are not published as releases.
 
-A push to `main` whose installer version (the one in `rulebooks/installer/rulebooks.ini`) has no release yet runs the release (`.github/workflows/release.yml`). It builds the files the same way, runs the tests, tags the commit `v<version>` (`v1.4` for Install ParlorNet Rulebooks 1.4), and publishes the files as a GitHub Release with their SHA-256 and MD5 sums. ParlorNet's docs site takes the installer and the READMEs from that release, at a tag it pins, and checks each file's SHA-256 before it serves it.
+A push to `main` whose installer version (the one in `rulebooks/installer/rulebooks.ini`) has no release yet runs the release (`.github/workflows/release.yml`). It builds the files the same way, runs the tests, tags the commit `v<version>` (`v1.5` for Install ParlorNet Rulebooks 1.5), and publishes a GitHub Release with the installer's `.hqx`, `.bin` and `.dsk` and nothing else. The release notes link each file and give its SHA-256. ParlorNet's docs site takes the three files from that release, at a tag it pins, and checks each file's SHA-256 before it serves it.
 
 ## License and notices
 
 The rulebooks and the build tools are ParlorNet's own code, under the MIT license; see [LICENSE](LICENSE). Each rulebook's folder has the same license.
 
-The installer is made with EUP, which is under the MIT license too. The installer program inside it carries parts of newlib, Multiversal Interfaces, and the Retro68 and GCC runtimes, and their notices are in the `licences` folder of [EUP's repository](https://github.com/eric-cgn/eup). The game rulebooks page and the installer's README say the same.
+The installer is made with EUP, which is under the MIT license too. The installer program inside it carries parts of newlib, Multiversal Interfaces, and the Retro68 and GCC runtimes, and their notices are in the `licences` folder of [EUP's repository](https://github.com/eric-cgn/eup). The game rulebooks page and the game rulebooks' README say the same.
 
 GameMaster is by Rhys Hollow, with Peter N. Lewis and Quinn. These rulebooks are not affiliated with them and contain none of GameMaster.
 
