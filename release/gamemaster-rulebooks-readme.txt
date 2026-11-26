@@ -90,8 +90,15 @@ Playing
 The files
 ---------
 
-parlornet-rulebooks-installer.hqx
-parlornet-rulebooks-installer.bin
+The installer comes as three files, and you need only one of them.
+
+parlornet-rulebooks-installer.hqx  BinHex, for a Mac that decodes BinHex
+                                   with StuffIt Expander or BinHex 4.0
+parlornet-rulebooks-installer.bin  MacBinary, for a Mac or a download
+                                   program that reads MacBinary
+parlornet-rulebooks-installer.dsk  an 800K disk image holding the
+                                   installer, for an emulator or for
+                                   writing a floppy disk
 
 
 GameMaster

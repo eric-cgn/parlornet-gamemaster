@@ -26,7 +26,7 @@ The game handle holds the 1024-byte header the game rulebooks share, with the co
 
 ## Building it
 
-`tools/build.sh` builds it with the Retro68 toolchain in Docker, into `build/rummytile-rulebook.bin`, `.hqx` and `.dsk`. The code is one flat code resource (`PROC` 128) of plain 68000 code, from `src/rummytile.c` and `rulebooks/common/rb.c`.
+`tools/build.sh` builds it with the Retro68 toolchain in Docker, into `build/rummytile-rulebook.bin`, which goes into the installer. The code is one flat code resource (`PROC` 128) of plain 68000 code, from `src/rummytile.c` and `rulebooks/common/rb.c`.
 
 ## License
 

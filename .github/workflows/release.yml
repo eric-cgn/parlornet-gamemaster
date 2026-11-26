@@ -1,10 +1,10 @@
 # Every push to main: if rulebooks/installer/rulebooks.ini names an installer version with no release yet,
 # build the rulebooks with tools/build.sh (Retro68 in Docker, pinned by digest) and the installer (EUP at a
-# pinned commit), run the tests, tag the commit v<version> (v1.4 for Install ParlorNet Rulebooks 1.4) and
-# publish a GitHub Release with the installer, each rulebook, the READMEs and their SHA-256 and MD5 sums
-# (SHA256SUMS, MD5SUMS, and in the release notes). A push that keeps the version does nothing. The ParlorNet
-# docs site fetches the installer and the READMEs from the release at a pinned tag and checks their SHA-256.
-# Run it by hand on main to release a version whose push did not run it.
+# pinned commit), run the tests, tag the commit v<version> (v1.5 for Install ParlorNet Rulebooks 1.5) and
+# publish a GitHub Release with three files, which are the installer as BinHex (.hqx), as MacBinary (.bin) and
+# on an 800K disk image (.dsk). The release notes link each file and give its SHA-256. A push that keeps the
+# version does nothing. The ParlorNet docs site fetches the three files from the release at a pinned tag and
+# checks their SHA-256. Run it by hand on main to release a version whose push did not run it.
 name: Release
 
 on:
@@ -48,21 +48,22 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           notes="$RUNNER_TEMP/notes.md"
+          url="https://github.com/$GITHUB_REPOSITORY/releases/download/v$VERSION"
+          f=parlornet-rulebooks-installer
           {
-            echo "Install ParlorNet Rulebooks $VERSION: the ParlorNet rulebook and the seven game rulebooks for GameMaster 1.0.0,"
-            echo "for a Mac Plus or later with System 6.0 or later. Built from this commit by tools/build.sh; the READMEs have"
-            echo "the instructions and the license."
+            echo "Install ParlorNet Rulebooks $VERSION puts the ParlorNet rulebook and the seven game rulebooks in the folder"
+            echo "that holds GameMaster 1.0.0. The rulebooks run on a Mac Plus or later with System 6.0 or later, and the"
+            echo "installer needs System 6.0.3 or later. Download one of these three files."
             echo
-            echo "SHA-256:"
+            echo "- [$f.hqx]($url/$f.hqx) is BinHex, for a Mac that decodes BinHex with StuffIt Expander or BinHex 4.0."
+            echo "- [$f.bin]($url/$f.bin) is MacBinary, for a Mac or a download program that reads MacBinary."
+            echo "- [$f.dsk]($url/$f.dsk) is an 800K disk image, for an emulator or for writing a floppy disk."
             echo
-            echo '```'
-            cat build/release/SHA256SUMS
-            echo '```'
-            echo
-            echo "MD5:"
+            echo "Their SHA-256 sums are below."
             echo
             echo '```'
-            cat build/release/MD5SUMS
+            (cd build/release && sha256sum $f.hqx $f.bin $f.dsk)
             echo '```'
           } > "$notes"
-          gh release create "v$VERSION" build/release/* --target "$GITHUB_SHA" --title "Install ParlorNet Rulebooks $VERSION" --notes-file "$notes"
+          gh release create "v$VERSION" build/release/$f.hqx build/release/$f.bin build/release/$f.dsk \
+            --target "$GITHUB_SHA" --title "Install ParlorNet Rulebooks $VERSION" --notes-file "$notes"

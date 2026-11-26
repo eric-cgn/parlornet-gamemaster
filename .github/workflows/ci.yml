@@ -1,11 +1,12 @@
-# Every push to main and every pull request: a build (tools/build.sh: the rulebooks with Retro68 in Docker,
-# the installer with EUP) and the tests, with the release files kept as an artifact. A pull request into main
-# fails unless it comes from dev: features go into dev, and main only takes dev, as a release.
+# Every push to dev or main and every pull request: a build (tools/build.sh: the rulebooks with Retro68 in
+# Docker, the installer with EUP) and the tests, with the release files kept as a workflow artifact. Builds of
+# dev are not published as releases. A pull request into main fails unless it comes from dev: features go into
+# dev, and main only takes dev, as a release.
 name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [dev, main]
   pull_request:
 
 permissions:
