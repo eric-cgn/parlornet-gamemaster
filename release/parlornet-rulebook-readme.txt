@@ -84,7 +84,7 @@ The files
 ---------
 
 The rulebook comes in Install ParlorNet Rulebooks
-(parlornet-rulebooks-installer.hqx or .bin), with the game rulebooks:
+(parlornet-rulebooks-installer.hqx, .bin or .dsk), with the game rulebooks:
 http://docs.parlornet.org/gamemaster-rulebooks.html
 
 

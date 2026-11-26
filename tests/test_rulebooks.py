@@ -34,7 +34,7 @@ PARLORNET = Rulebook("parlornet-rulebook", "ParlorNet", "parlornet", "ParlorNet"
 # The versions the ParlorNet server's GameMaster extension is known to work with (README, "The ParlorNet server
 # they work with"): a change here goes with a change there.
 GAME_VERSION, GAME_GMRZ, GAME_OLDEST = "1.1.1", "0x0111", "0x0100"
-LOBBY_VERSION, INSTALLER_VERSION = "0.5", "1.4"
+LOBBY_VERSION, INSTALLER_VERSION = "0.5", "1.5"
 
 
 def read(*path, mode="r"):
@@ -128,6 +128,22 @@ class Sources(unittest.TestCase):
         self.assertIn("rulebooks/installer/rulebooks.ini", workflow)
         self.assertLess(workflow.index("tools/build.sh"), workflow.index("unittest discover -s tests"))
         self.assertLess(workflow.index("unittest discover -s tests"), workflow.index("gh release create"))
+        # the release is the installer as .hqx, .bin and .dsk, each linked from the notes, and nothing else
+        create = workflow[workflow.index("gh release create"):]
+        self.assertEqual(re.findall(r"build/release/\S+", create),
+                         ["build/release/$f.%s" % e for e in ("hqx", "bin", "dsk")])
+        self.assertIn('f=%s\n' % INSTALLER, workflow)
+        for e in ("hqx", "bin", "dsk"):
+            self.assertIn("[$f.%s]($url/$f.%s)" % (e, e), workflow)
+        self.assertIn('url="https://github.com/$GITHUB_REPOSITORY/releases/download/v$VERSION"', workflow)
+        self.assertNotIn("SUMS", workflow)
+        self.assertNotIn("readme", workflow.lower())
+        # dev builds are kept as CI artifacts, never published as a release
+        self.assertFalse(os.path.exists(os.path.join(ROOT, ".github", "workflows", "dev.yml")))
+        ci = read(".github", "workflows", "ci.yml")
+        self.assertIn("branches: [dev, main]", ci)
+        self.assertNotIn("gh release", ci)
+        self.assertIn("for ext in hqx bin dsk; do", script)
         for d, _, fs in os.walk(os.path.join(ROOT, "rulebooks")):      # built, never committed
             for f in fs:
                 self.assertFalse(f.endswith((".bin", ".hqx", ".dsk")), os.path.join(d, f))
@@ -162,34 +178,39 @@ class Releases(unittest.TestCase):
 
 class Built(unittest.TestCase):
     """The files tools/build.sh made, when it has run."""
-
-    def check(self, slug, name, ftype, creator, exts, ours=True):
-        """ours: the .hqx made by tools/binhex4.py (EUP writes the installer's own)."""
+    def test_rulebooks(self):
+        """Each rulebook's MacBinary, which goes into the installer: its name, type and creator."""
         import binhex4
-        files = {e: built(slug, e) for e in exts}
+        for r in [PARLORNET] + RULEBOOKS:
+            with self.subTest(r.slug):
+                data = built(r.slug, "bin")
+                if data is None:
+                    self.skipTest("not built (tools/build.sh)")
+                mb = binhex4.read_macbinary(data)
+                self.assertEqual((mb["name"], mb["type"], mb["creator"]), (r.name.encode(), b"GMRB", b"GMST"))
+
+    def test_installer(self):
+        """The installer's .hqx and .bin hold the same file, and its .dsk is an 800K HFS disk that holds it
+        (both forks, under its own name); the release files are those three and nothing else, as built."""
+        import binhex4
+        files = {e: built(INSTALLER, e) for e in ("hqx", "bin", "dsk")}
         if not all(files.values()):
             self.skipTest("not built (tools/build.sh)")
         hqx, mb = binhex4.decode(files["hqx"]), binhex4.read_macbinary(files["bin"])
         self.assertEqual(hqx, mb)
-        self.assertEqual((hqx["name"], hqx["type"], hqx["creator"]), (name, ftype, creator))
-        if ours:
-            self.assertEqual(binhex4.encode(mb), files["hqx"])
-        if "dsk" in files:
-            self.assertEqual(files["dsk"][1024:1026], b"BD")
-        sums = os.path.join(BUILD, "release", "SHA256SUMS")
-        if os.path.isfile(sums):
-            with open(sums) as f:
-                listed = dict(reversed(l.split("  ", 1)) for l in f.read().splitlines())
-            for ext, data in files.items():
-                self.assertEqual(listed["%s.%s" % (slug, ext)], hashlib.sha256(data).hexdigest())
-
-    def test_rulebooks(self):
-        for r in [PARLORNET] + RULEBOOKS:
-            with self.subTest(r.slug):
-                self.check(r.slug, r.name.encode(), b"GMRB", b"GMST", ("hqx", "bin", "dsk"))
-
-    def test_installer(self):
-        self.check(INSTALLER, b"Install ParlorNet Rulebooks", b"APPL", b"EUPi", ("hqx", "bin"), ours=False)
+        self.assertEqual((mb["name"], mb["type"], mb["creator"]), (b"Install ParlorNet Rulebooks", b"APPL", b"EUPi"))
+        dsk = files["dsk"]
+        self.assertEqual(len(dsk), 800 * 1024)
+        self.assertEqual(dsk[1024:1026], b"BD")
+        self.assertEqual(dsk[1024 + 36:1024 + 37 + dsk[1024 + 36]], b"\x1bInstall ParlorNet Rulebooks")  # volume
+        self.assertIn(mb["data"], dsk)
+        self.assertIn(mb["rsrc"], dsk)
+        release = os.path.join(BUILD, "release")
+        if os.path.isdir(release):
+            self.assertEqual(sorted(os.listdir(release)), sorted("%s.%s" % (INSTALLER, e) for e in files))
+            for e, data in files.items():
+                with open(os.path.join(release, "%s.%s" % (INSTALLER, e)), "rb") as f:
+                    self.assertEqual(hashlib.sha256(f.read()).hexdigest(), hashlib.sha256(data).hexdigest())
 
 
 class BinHex(unittest.TestCase):

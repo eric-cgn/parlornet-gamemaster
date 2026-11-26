@@ -36,7 +36,7 @@ The game handle holds a 1024-byte header that all of ParlorNet's game rulebooks 
 
 ## Building it
 
-`tools/build.sh` builds it with the Retro68 toolchain in Docker, into `build/checkers-rulebook.bin`, `.hqx` and `.dsk`. The code is one flat code resource (`PROC` 128) of plain 68000 code, from `src/checkers.c` and `rulebooks/common/rb.c`.
+`tools/build.sh` builds it with the Retro68 toolchain in Docker, into `build/checkers-rulebook.bin`, which goes into the installer. The code is one flat code resource (`PROC` 128) of plain 68000 code, from `src/checkers.c` and `rulebooks/common/rb.c`.
 
 ## License
 

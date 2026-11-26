@@ -35,7 +35,7 @@ System 6 has no pop-up menu control (the standard one came with System 7), so th
 
 ## Building it
 
-`tools/build.sh` builds it with the Retro68 toolchain in Docker, into `build/parlornet-rulebook.bin`, `.hqx` and `.dsk`. The code is one flat code resource (`PROC` 128) of plain 68000 code.
+`tools/build.sh` builds it with the Retro68 toolchain in Docker, into `build/parlornet-rulebook.bin`, which goes into the installer. The code is one flat code resource (`PROC` 128) of plain 68000 code.
 
 ## License
 
