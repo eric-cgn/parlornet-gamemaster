@@ -15,7 +15,7 @@ They are part of [ParlorNet](https://github.com/eric-cgn/parlornet), a server fo
 | `rulebooks/cannonfire` | Cannon Fire, two tanks shelling each other, on a parlor only (`Cannon Fire [ParlorNet]`) | 1.1.1 |
 | `rulebooks/backgammon` | Backgammon with the doubling cube, on a parlor only (`Backgammon [ParlorNet]`) | 1.1.1 |
 | `rulebooks/common` | the code and the messages the game rulebooks share (`rb.c`, `rb.h`), and GameMaster's `GMRZ` resource type (`GMRZ.r`), which every rulebook here uses | |
-| `rulebooks/installer` | Install ParlorNet Rulebooks: the EUP description (`rulebooks.ini`) and its first screen (`About.txt`) | 1.5 |
+| `rulebooks/installer` | Install ParlorNet Rulebooks: the EUP description (`rulebooks.ini`) and its first screen (`About.txt`) | 1.6 |
 | `release` | the READMEs of the ParlorNet rulebook and the game rulebooks, which ParlorNet's docs site serves with the installer | |
 
 Each rulebook's own README says how it plays, the messages it sends and how its game record is kept.
@@ -60,7 +60,7 @@ It writes `build/parlornet-rulebook.bin` and the same for each game rulebook (`b
 
 Changes go into `dev` by pull request, squashed; `main` takes only merges from `dev`, which is how a release is made. Every pull request and every push to `dev` or `main` builds and tests (`.github/workflows/ci.yml`) and keeps the three files as a workflow artifact, and a pull request into `main` fails unless it comes from `dev`. Builds of `dev` are not published as releases.
 
-A push to `main` whose installer version (the one in `rulebooks/installer/rulebooks.ini`) has no release yet runs the release (`.github/workflows/release.yml`). It builds the files the same way, runs the tests, tags the commit `v<version>` (`v1.5` for Install ParlorNet Rulebooks 1.5), and publishes a GitHub Release with the installer's `.hqx`, `.bin` and `.dsk` and nothing else. The release notes link each file and give its SHA-256. ParlorNet's docs site takes the three files from that release, at a tag it pins, and checks each file's SHA-256 before it serves it.
+A push to `main` whose installer version (the one in `rulebooks/installer/rulebooks.ini`) has no release yet runs the release (`.github/workflows/release.yml`). It builds the files the same way, runs the tests, tags the commit `v<version>` (`v1.6` for Install ParlorNet Rulebooks 1.6), and publishes a GitHub Release with the installer's `.hqx`, `.bin` and `.dsk` and nothing else. The release notes link each file and give its SHA-256. ParlorNet's docs site takes the three files from that release, at a tag it pins, and checks each file's SHA-256 before it serves it.
 
 ## License and notices
 
