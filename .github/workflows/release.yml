@@ -1,6 +1,6 @@
 # Every push to main: if rulebooks/installer/rulebooks.ini names an installer version with no release yet,
 # build the rulebooks with tools/build.sh (Retro68 in Docker, pinned by digest) and the installer (EUP at a
-# pinned commit), run the tests, tag the commit v<version> (v1.5 for Install ParlorNet Rulebooks 1.5) and
+# pinned commit), run the tests, tag the commit v<version> (v1.6 for Install ParlorNet Rulebooks 1.6) and
 # publish a GitHub Release with three files, which are the installer as BinHex (.hqx), as MacBinary (.bin) and
 # on an 800K disk image (.dsk). The release notes link each file and give its SHA-256. A push that keeps the
 # version does nothing. The ParlorNet docs site fetches the three files from the release at a pinned tag and

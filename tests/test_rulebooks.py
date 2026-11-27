@@ -22,7 +22,7 @@ CREDITS = (b"Eric", b"Claude", b"Anthropic", b"Credits", b"Thaller")
 # they work with"): a change here goes with a change there.
 GAME_VERSION, GAME_GMRZ, GAME_OLDEST = "1.1.1", "0x0111", "0x0100"
 GRIDWORDS_VERSION, GRIDWORDS_GMRZ = "1.2.0", "0x0120"
-LOBBY_VERSION, INSTALLER_VERSION = "0.6", "1.5"
+LOBBY_VERSION, INSTALLER_VERSION = "0.6", "1.6"
 
 # slug: the downloads' name; name: the file on the Mac; folder: under rulebooks/; stem: its .r file; rb_id: its
 # GMRZ ID string; version and gmrz: its version as the vers and GMRZ resources give it.
