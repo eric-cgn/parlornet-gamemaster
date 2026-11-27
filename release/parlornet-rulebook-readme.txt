@@ -1,4 +1,4 @@
-ParlorNet rulebook for GameMaster 0.5
+ParlorNet rulebook for GameMaster 0.6
 =====================================
 
 This rulebook for GameMaster 1.0.0, the Macintosh game program of 1991,

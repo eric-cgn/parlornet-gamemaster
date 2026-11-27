@@ -40,7 +40,7 @@
 
 #define kW 400
 #define kH 256
-#define kVersion "0.5"          /* the rulebook's version, as its 'vers' resource gives it (ParlorNet.r) */
+#define kVersion "0.6"          /* the rulebook's version, as its 'vers' resource gives it (ParlorNet.r) */
 
 enum { sOffline, sConnecting, sSigning, sAsking, sLobby };
 enum { fHost, fPort, fName, fAnswer, kFields };
@@ -89,7 +89,7 @@ static const Game gGames[] = {
 	{ "Checkers", "checkers/1 american", (const unsigned char *)"\024Checkers [ParlorNet]", true },
 	{ "Mancala", "mancala/1 kalah", (const unsigned char *)"\023Mancala [ParlorNet]", true },
 	{ "Five in a Row", "fiveinarow/1 freestyle", (const unsigned char *)"\031Five in a Row [ParlorNet]", true },
-	{ "Grid Words", "gridwords/1 classic", (const unsigned char *)"\026Grid Words [ParlorNet]", true },
+	{ "Grid Words", "gridwords/1 standard", (const unsigned char *)"\026Grid Words [ParlorNet]", true },
 	{ "Rummy Tile", "rummytile/1 standard", (const unsigned char *)"\026Rummy Tile [ParlorNet]", true },
 	{ "Cannon Fire", "cannonfire/1 classic", (const unsigned char *)"\027Cannon Fire [ParlorNet]", true },
 	{ "Backgammon", "backgammon/1 standard", (const unsigned char *)"\026Backgammon [ParlorNet]", true },

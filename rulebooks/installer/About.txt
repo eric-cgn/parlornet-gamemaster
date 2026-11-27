@@ -1,4 +1,4 @@
-ParlorNet Rulebooks 1.5
+ParlorNet Rulebooks 1.6
 
 These are rulebooks for GameMaster 1.0.0, the Macintosh game program of 1991. GameMaster itself is not included.
 
@@ -9,7 +9,7 @@ The game rulebooks play these games on a parlor, against the bot or another play
 Checkers plays by American rules.
 Mancala plays by Kalah rules with four seeds a pit.
 Five in a Row plays on a 15 by 15 board, and five or more in a line wins.
-Grid Words is the crossword game, by the classic rules on the standard board. It plays only on a parlor, which deals the tiles and checks the words.
+Grid Words is the crossword game, and it plays only on a parlor. The parlor deals the tiles and checks the words, and it sends the board and the letter values of the table's own rules.
 Rummy Tile is tile rummy for two by the standard rules. It plays only on a parlor, which deals the tiles and checks every turn.
 Cannon Fire has two tanks shelling each other across a landscape. It plays only on a parlor, which flies the shells.
 Backgammon plays by the standard rules with the doubling cube. It plays only on a parlor, which rolls the dice and checks every turn.

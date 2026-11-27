@@ -10,7 +10,7 @@ data 'PROC' (128, "Grid Words", locked) {
 
 resource 'GMRZ' (128) {
 	10, "Grid Words", 0, "", 11, "MIT license", 22, "Grid Words [ParlorNet]",
-	0x0111, 0x0100, 0x0100, 0x0100,
+	0x0120, 0x0100, 0x0100, 0x0100,
 	30000, 3000,
 	0x00, 0, 0
 };
@@ -22,7 +22,7 @@ resource 'DITL' (128, purgeable) {
 };
 
 resource 'vers' (1) {
-	0x01, 0x11, release, 0x00, verUS,
-	"1.1.1",
-	"1.1.1, MIT license"
+	0x01, 0x20, release, 0x00, verUS,
+	"1.2.0",
+	"1.2.0, MIT license"
 };

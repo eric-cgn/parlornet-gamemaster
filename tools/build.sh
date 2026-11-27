@@ -54,11 +54,11 @@ build() {   # build <source folder> <build name> <file name> <release date>
 	python3 tools/patcher_dates.py "$day" "$OUT/$dir.bin" "$OUT/$dir/$app.dsk"
 }
 
-build rulebooks/parlornet parlornet-rulebook ParlorNet 2026-11-24
+build rulebooks/parlornet parlornet-rulebook ParlorNet 2026-11-27
 build rulebooks/checkers checkers-rulebook "Checkers" 2026-11-22
 build rulebooks/mancala mancala-rulebook "Mancala" 2026-11-22
 build rulebooks/fiveinarow fiveinarow-rulebook "Five in a Row" 2026-11-22
-build rulebooks/gridwords gridwords-rulebook "Grid Words" 2026-11-22
+build rulebooks/gridwords gridwords-rulebook "Grid Words" 2026-11-27
 build rulebooks/rummytile rummytile-rulebook "Rummy Tile" 2026-11-22
 build rulebooks/cannonfire cannonfire-rulebook "Cannon Fire" 2026-11-22
 build rulebooks/backgammon backgammon-rulebook "Backgammon" 2026-11-24

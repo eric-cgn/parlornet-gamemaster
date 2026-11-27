@@ -10,7 +10,7 @@ data 'PROC' (128, "ParlorNet", locked) {
 
 resource 'GMRZ' (128) {
 	9, "ParlorNet", 0, "", 11, "MIT license", 9, "ParlorNet",
-	0x0050, 0x0020, 0x0100, 0x0100,
+	0x0060, 0x0020, 0x0100, 0x0100,
 	40000, 2000,
 	0xF0, 0, 0
 };
@@ -22,7 +22,7 @@ resource 'DITL' (128, purgeable) {
 };
 
 resource 'vers' (1) {
-	0x00, 0x50, development, 0x00, verUS,
-	"0.5",
-	"0.5, MIT license"
+	0x00, 0x60, development, 0x00, verUS,
+	"0.6",
+	"0.6, MIT license"
 };

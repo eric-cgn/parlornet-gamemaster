@@ -18,23 +18,32 @@ IMAGE = "ghcr.io/autc04/retro68@sha256:96ae710e8c80ac92a90da19598115a572ed6a5014
 INSTALLER = "parlornet-rulebooks-installer"
 CREDITS = (b"Eric", b"Claude", b"Anthropic", b"Credits", b"Thaller")
 
-# slug: the downloads' name; name: the file on the Mac; folder: under rulebooks/; stem: its .r file; rb_id: its
-# GMRZ ID string.
-Rulebook = collections.namedtuple("Rulebook", "slug name folder stem rb_id")
-RULEBOOKS = [
-    Rulebook("checkers-rulebook", "Checkers", "checkers", "Checkers", "Checkers [ParlorNet]"),
-    Rulebook("mancala-rulebook", "Mancala", "mancala", "Mancala", "Mancala [ParlorNet]"),
-    Rulebook("fiveinarow-rulebook", "Five in a Row", "fiveinarow", "FiveInARow", "Five in a Row [ParlorNet]"),
-    Rulebook("gridwords-rulebook", "Grid Words", "gridwords", "GridWords", "Grid Words [ParlorNet]"),
-    Rulebook("rummytile-rulebook", "Rummy Tile", "rummytile", "RummyTile", "Rummy Tile [ParlorNet]"),
-    Rulebook("cannonfire-rulebook", "Cannon Fire", "cannonfire", "CannonFire", "Cannon Fire [ParlorNet]"),
-    Rulebook("backgammon-rulebook", "Backgammon", "backgammon", "Backgammon", "Backgammon [ParlorNet]"),
-]
-PARLORNET = Rulebook("parlornet-rulebook", "ParlorNet", "parlornet", "ParlorNet", "ParlorNet")
 # The versions the ParlorNet server's GameMaster extension is known to work with (README, "The ParlorNet server
 # they work with"): a change here goes with a change there.
 GAME_VERSION, GAME_GMRZ, GAME_OLDEST = "1.1.1", "0x0111", "0x0100"
-LOBBY_VERSION, INSTALLER_VERSION = "0.5", "1.5"
+GRIDWORDS_VERSION, GRIDWORDS_GMRZ = "1.2.0", "0x0120"
+LOBBY_VERSION, INSTALLER_VERSION = "0.6", "1.6"
+
+# slug: the downloads' name; name: the file on the Mac; folder: under rulebooks/; stem: its .r file; rb_id: its
+# GMRZ ID string; version and gmrz: its version as the vers and GMRZ resources give it.
+Rulebook = collections.namedtuple("Rulebook", "slug name folder stem rb_id version gmrz")
+RULEBOOKS = [
+    Rulebook("checkers-rulebook", "Checkers", "checkers", "Checkers", "Checkers [ParlorNet]",
+             GAME_VERSION, GAME_GMRZ),
+    Rulebook("mancala-rulebook", "Mancala", "mancala", "Mancala", "Mancala [ParlorNet]", GAME_VERSION, GAME_GMRZ),
+    Rulebook("fiveinarow-rulebook", "Five in a Row", "fiveinarow", "FiveInARow", "Five in a Row [ParlorNet]",
+             GAME_VERSION, GAME_GMRZ),
+    Rulebook("gridwords-rulebook", "Grid Words", "gridwords", "GridWords", "Grid Words [ParlorNet]",
+             GRIDWORDS_VERSION, GRIDWORDS_GMRZ),
+    Rulebook("rummytile-rulebook", "Rummy Tile", "rummytile", "RummyTile", "Rummy Tile [ParlorNet]",
+             GAME_VERSION, GAME_GMRZ),
+    Rulebook("cannonfire-rulebook", "Cannon Fire", "cannonfire", "CannonFire", "Cannon Fire [ParlorNet]",
+             GAME_VERSION, GAME_GMRZ),
+    Rulebook("backgammon-rulebook", "Backgammon", "backgammon", "Backgammon", "Backgammon [ParlorNet]",
+             GAME_VERSION, GAME_GMRZ),
+]
+PARLORNET = Rulebook("parlornet-rulebook", "ParlorNet", "parlornet", "ParlorNet", "ParlorNet", LOBBY_VERSION,
+                     "0x0060")
 
 
 def read(*path, mode="r"):
@@ -75,7 +84,10 @@ class Sources(unittest.TestCase):
         r = read("rulebooks", "parlornet", "src", "ParlorNet.r")
         self.assertIn('9, "ParlorNet", 0, "", 11, "MIT license", 9, "ParlorNet",', r)
         self.assertIn('"%s, MIT license"' % LOBBY_VERSION, r)
-        self.assertIn('#define kVersion "%s"' % LOBBY_VERSION, read("rulebooks", "parlornet", "src", "lobby.c"))
+        self.assertIn('9, "ParlorNet", 0, "", 11, "MIT license", 9, "ParlorNet",\n\t%s,' % PARLORNET.gmrz, r)
+        lobby = read("rulebooks", "parlornet", "src", "lobby.c")
+        self.assertIn('#define kVersion "%s"' % LOBBY_VERSION, lobby)
+        self.assertIn('{ "Grid Words", "gridwords/1 standard", ', lobby)    # the extension's rules id for it
         self.assertIn("build rulebooks/parlornet parlornet-rulebook ParlorNet", read("tools", "build.sh"))
         self.assertEqual(read("rulebooks", "parlornet", "LICENSE"), read("LICENSE"))
 
@@ -95,8 +107,11 @@ class Sources(unittest.TestCase):
             rez = read("rulebooks", r.folder, "src", r.stem + ".r")
             self.assertIn('%d, "%s", 0, "", 11, "MIT license", %d, "%s",' % (len(r.name), r.name, len(r.rb_id),
                                                                          r.rb_id), rez)
-            self.assertIn("\t%s, %s, 0x0100, 0x0100," % (GAME_GMRZ, GAME_OLDEST), rez)
-            self.assertIn('"%s, MIT license"' % GAME_VERSION, rez)
+            self.assertIn("\t%s, %s, 0x0100, 0x0100," % (r.gmrz, GAME_OLDEST), rez)
+            self.assertIn('"%s, MIT license"' % r.version, rez)
+            major, minor, fix = (int(n) for n in r.version.split("."))
+            self.assertEqual(r.gmrz, "0x%02x%x%x" % (major, minor, fix))
+            self.assertIn("\t0x%02x, 0x%x%x, release," % (major, minor, fix), rez)
             self.assertIn('build rulebooks/%s %s "%s"' % (r.folder, r.slug, r.name), script)
             self.assertIn('cp "$OUT/%s.bin" "$stage/%s.bin"' % (r.slug, r.name), script)
             self.assertIn("source = %s.bin" % r.name, ini)
@@ -151,7 +166,8 @@ class Sources(unittest.TestCase):
     def test_the_readme_versions(self):
         """The repository's README names the versions the server's extension works with."""
         readme = read("README.md")
-        for text in ("ParlorNet rulebook %s" % LOBBY_VERSION, "game rulebooks 1.1.1", "`0x0111`", "PARLORNET/1",
+        for text in ("ParlorNet rulebook %s" % LOBBY_VERSION, "game rulebooks %s" % GAME_VERSION, "`%s`" % GAME_GMRZ,
+                     "Grid Words %s" % GRIDWORDS_VERSION, "`%s`" % GRIDWORDS_GMRZ, "PARLORNET/1",
                      "Install ParlorNet Rulebooks %s" % INSTALLER_VERSION, "port 6508"):
             self.assertIn(text, readme)
 

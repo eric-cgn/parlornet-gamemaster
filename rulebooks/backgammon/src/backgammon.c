@@ -526,54 +526,46 @@ static void Checker(const Rect *r, short seat, Boolean ghost)
 		PaintOval(r);
 }
 
-/* the place of the outermost checker drawn of a stack of n (n > 0): below the +n when there are more than
-   kShown */
+/* the place of the outermost checker drawn of a stack of n (n > 0) */
 static short Top(short n)
 {
-	return n > kShown ? kShown - 2 : n - 1;
+	return n > kShown ? kShown - 1 : n - 1;
 }
 
-/* +n in r, the last place of a stack: the checkers not drawn, black on a white label (framed in dots when
-   the stack is where the checker picked up can go) */
-static void More(const Rect *r, short n, Boolean target)
+/* the number on the outermost checker drawn of a stack of n: how many checkers it stands for, itself and the
+   ones not drawn under it, or 0 when the whole stack is drawn */
+static short Count(short n)
 {
-	Rect b = *r;
+	return n > kShown ? n - kShown + 1 : 0;
+}
+
+/* n on the checker in r: black on a white checker, cut out of a black one */
+static void Number(const Rect *r, short n, Boolean white)
+{
 	char t[8];
 
-	t[0] = '+';
-	t[1] = 0;
+	t[0] = 0;
 	RBNum(t, n);
-	InsetRect(&b, 0, 3);
-	EraseRect(&b);
-	if (target) {
-		PenPat(&kDots);
-		PenSize(2, 2);
-	}
-	FrameRect(&b);
-	PenNormal();
 	TextFace(bold);
-	if (TextWidth(t, 0, strlen(t)) > b.right - b.left - 3)
-		TextFace(0);
-	MoveTo((b.left + b.right - TextWidth(t, 0, strlen(t))) / 2 + 1, b.bottom - 4);
+	TextMode(white ? srcOr : srcBic);
+	MoveTo((r->left + r->right - TextWidth(t, 0, strlen(t))) / 2, r->bottom - 6);
 	RBText(t);
+	TextMode(srcOr);
 	TextFace(0);
 }
 
-/* n checkers of seat on point p (or the bar): up to kShown, or one fewer and +n in the last place for the
-   rest */
+/* n checkers of seat on point p (or the bar): up to kShown, the last with a number when there are more */
 static void Stack(Gammon *g, short p, short seat, short n)
 {
 	short i;
 	Rect r;
 
-	for (i = 0; i <= Top(n) && n > 0; i++) {
+	for (i = 0; i <= Top(n); i++) {
 		Spot(g, p, seat, i, &r);
 		Checker(&r, seat, false);
 	}
-	if (n > kShown) {
-		Spot(g, p, seat, kShown - 1, &r);
-		More(&r, n - (kShown - 1), false);
-	}
+	if (Count(n))
+		Number(&r, Count(n), seat == 0);
 }
 
 static void Triangle(Gammon *g, short col, Boolean bottom)
@@ -823,7 +815,9 @@ void GameDraw(RBHead *h)
 	if (g->sel >= 0) {
 		short cnt = g->sel == kBar ? bd.bar[me] : bd.p[g->sel - 1] * Sign(me);
 		Spot(g, g->sel, me, cnt > 1 ? Top(cnt) : 0, &r);
-		InsetRect(&r, 5, 5);            /* a dot in its middle: picked up, still its own color */
+		/* a dot in its middle: picked up, still its own color; a checker with a number gets a larger dot,
+		   which turns the whole number over with it */
+		InsetRect(&r, Count(cnt) ? 2 : 5, Count(cnt) ? 2 : 5);
 		InvertOval(&r);
 		for (i = 0; i < n; i++)
 			if (legal[i].from == g->sel) {
@@ -835,12 +829,12 @@ void GameDraw(RBHead *h)
 					FrameRect(&r);
 					PenNormal();
 				} else {
+					/* the checker where it would land, with the number it would show there */
 					cnt = bd.p[legal[i].to - 1] * Sign(me);
 					Spot(g, legal[i].to, me, cnt < 0 ? 1 : cnt, &r);
-					if (cnt > kShown)
-						More(&r, cnt - (kShown - 1), true);
-					else
-						Checker(&r, me, true);
+					Checker(&r, me, true);
+					if (cnt >= 0 && Count(cnt + 1))
+						Number(&r, Count(cnt + 1), true);
 				}
 			}
 	}
