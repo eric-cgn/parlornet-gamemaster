@@ -1,12 +1,13 @@
 /*
- * Grid Words for GameMaster: ParlorNet's gridwords/1, ruleset classic, for two
- * players (docs/types/gridwords-1.md in the ParlorNet repository).
+ * Grid Words for GameMaster: ParlorNet's gridwords/1, any of its rulesets, for
+ * two players (docs/types/gridwords-1.md in the ParlorNet repository).
  *
- * A 15 by 15 board with the usual premium squares, a rack of seven tiles each,
- * and a bag the parlor keeps: the parlor deals, checks every word against its
- * word list and keeps the score, so this rulebook plays only on a parlor. It
- * draws the board, the rack and the scores the parlor sends, and builds a play
- * by clicks or typing.
+ * The game has a 15 by 15 board, a rack of seven tiles each, and a bag the
+ * parlor keeps. The parlor deals, checks every word against its word list and
+ * keeps the score, so this rulebook plays only on a parlor. The table's ruleset
+ * sets the board's bonus squares and the letters' points, and the parlor sends
+ * both. The rulebook draws the board, the rack and the scores the parlor sends,
+ * and builds a play by clicks or typing.
  *
  * Moves are the parlor's own: PLAY x y H|V letters (the whole main word from x y,
  * across or down, the letters already on the board written out and _ before a
@@ -15,6 +16,12 @@
  * tiles left in the bag. A whole position (rb.h) is BD and the 225 squares row
  * by row (. empty, a letter, a blank's letter in lower case), K, S, B, and LP
  * x y H|V length for the last play.
+ *
+ * The parlor sends the table's board and points when the game starts, and again
+ * before every whole position: SQ and the 225 squares row by row (. plain, d and
+ * t double and triple letter, D and T double and triple word), and LV and the
+ * points of A to Z, 26 numbers from 0 to 10. Until they come the board has no
+ * bonus squares and the tiles have no numbers.
  */
 #include <Quickdraw.h>
 #include <Sound.h>
@@ -29,7 +36,7 @@ enum { bPlay, bClear, bExchange, bPass, kButtons };
 
 const short gPlayW = 432, gPlayH = 236;
 const OSType gMagic = 'PNgw';
-const short gFormat = 1;
+const short gFormat = 2;
 const Boolean gDraws = false;
 const Boolean gParlorOnly = true;
 
@@ -52,10 +59,12 @@ typedef struct {
 	short lastSq, lastLen;      /* the last word played, to mark it */
 	unsigned char lastAcross;
 	unsigned char pad;
+	char squares[kN * kN];      /* 1306: the table's board from SQ (. d t D T), or all 0 until SQ comes */
+	unsigned char values[26];   /* 1531: the points of A to Z, from LV */
+	unsigned char valued;       /* 1557: LV has come */
 } Grid;
 
 static const Pattern kTL = { { 0x88, 0x22, 0x88, 0x22, 0x88, 0x22, 0x88, 0x22 } };
-static const char kValues[26] = { 1, 3, 3, 2, 1, 4, 2, 4, 1, 8, 5, 1, 3, 1, 1, 3, 10, 1, 1, 1, 1, 4, 4, 8, 4, 10 };
 
 static Rect gButtonRect[kButtons];
 
@@ -70,30 +79,6 @@ const char *GameSeat(short seat)
 }
 
 /* ---- the board ----------------------------------------------------------------------------------- */
-
-/* 'T' 'D' (triple and double word), 't' 'd' (triple and double letter), or 0; x and y from 1 */
-static char Premium(short x, short y)
-{
-	static const unsigned char tw[][2] = { { 1, 1 }, { 8, 1 } };
-	static const unsigned char dw[][2] = { { 2, 2 }, { 3, 3 }, { 4, 4 }, { 5, 5 }, { 8, 8 } };
-	static const unsigned char tl[][2] = { { 6, 2 }, { 6, 6 } };
-	static const unsigned char dl[][2] = { { 4, 1 }, { 7, 3 }, { 8, 4 }, { 7, 7 } };
-	short a = x > 8 ? 16 - x : x, b = y > 8 ? 16 - y : y, i;
-
-	for (i = 0; i < 2; i++)
-		if ((tw[i][0] == a && tw[i][1] == b) || (tw[i][0] == b && tw[i][1] == a))
-			return 'T';
-	for (i = 0; i < 5; i++)
-		if ((dw[i][0] == a && dw[i][1] == b) || (dw[i][0] == b && dw[i][1] == a))
-			return 'D';
-	for (i = 0; i < 2; i++)
-		if ((tl[i][0] == a && tl[i][1] == b) || (tl[i][0] == b && tl[i][1] == a))
-			return 't';
-	for (i = 0; i < 4; i++)
-		if ((dl[i][0] == a && dl[i][1] == b) || (dl[i][0] == b && dl[i][1] == a))
-			return 'd';
-	return 0;
-}
 
 static char Upper(char c)
 {
@@ -247,6 +232,35 @@ Boolean GameMessage(RBHead *h, const char *m)
 		g->bag = Num(&p);
 		return true;
 	}
+	if (m[0] == 'S' && m[1] == 'Q' && m[2] == ' ') {
+		p = m + 3;
+		if (strlen(p) != kN * kN || strspn(p, ".dtDT") != kN * kN)
+			return true;                /* not 225 squares: the board stays as it was */
+		memcpy(g->squares, p, kN * kN);
+		return true;
+	}
+	if (m[0] == 'L' && m[1] == 'V' && m[2] == ' ') {
+		unsigned char v[26];
+		short i, n;
+		p = m + 3;
+		for (i = 0; i < 26; i++) {      /* a bad line leaves the points as they were */
+			if (i > 0 && *p++ != ' ')
+				return true;
+			if (*p < '0' || *p > '9')
+				return true;
+			n = *p++ - '0';
+			if (*p >= '0' && *p <= '9')
+				n = n * 10 + *p++ - '0';
+			if (n > 10 || (*p >= '0' && *p <= '9'))
+				return true;
+			v[i] = n;
+		}
+		if (*p)
+			return true;
+		memcpy(g->values, v, 26);
+		g->valued = 1;
+		return true;
+	}
 	return PositionLine(g, m);
 }
 
@@ -371,9 +385,9 @@ void GameDraw(RBHead *h)
 			if (!g->board[sq])
 				InvertRect(&r);         /* a tile of the play being built */
 		} else {
-			char k = Premium(sq % kN + 1, sq / kN + 1);
+			char k = g->squares[sq];
 			FrameRect(&r);
-			if (k) {                    /* the premium in words: 3W, 2W, 3L, 2L */
+			if (k && k != '.') {        /* the bonus in words: 3W, 2W, 3L, 2L */
 				char t[3];
 				t[0] = k == 'T' || k == 't' ? '3' : '2';
 				t[1] = k == 'T' || k == 'D' ? 'W' : 'L';
@@ -433,12 +447,14 @@ void GameDraw(RBHead *h)
 		FrameRect(&r);
 		if (g->rack[i] != '_') {
 			Letter(&r, g->rack[i], true);
-			t[0] = 0;
-			RBNum(t, kValues[g->rack[i] - 'A']);
-			MoveTo(r.right - 2 - TextWidth(t, 0, strlen(t)), r.bottom - 2);
-			TextSize(9);
-			RBText(t);
-			RBBody();
+			if (g->valued && g->rack[i] >= 'A' && g->rack[i] <= 'Z') {
+				t[0] = 0;
+				RBNum(t, g->values[g->rack[i] - 'A']);
+				MoveTo(r.right - 2 - TextWidth(t, 0, strlen(t)), r.bottom - 2);
+				TextSize(9);
+				RBText(t);
+				RBBody();
+			}
 		}
 		if (g->mode == mExchange && (g->marked & (1 << i)))
 			InvertRect(&r);

@@ -6,11 +6,11 @@ They are part of [ParlorNet](https://github.com/eric-cgn/parlornet), a server fo
 
 | Folder | What it is | Version |
 |---|---|---|
-| `rulebooks/parlornet` | the ParlorNet rulebook: sign-in, the lobby, and every game over one connection to the parlor | 0.5 |
+| `rulebooks/parlornet` | the ParlorNet rulebook: sign-in, the lobby, and every game over one connection to the parlor | 0.6 |
 | `rulebooks/checkers` | Checkers, American rules (`Checkers [ParlorNet]`) | 1.1.1 |
 | `rulebooks/mancala` | Mancala, Kalah rules with four seeds a pit (`Mancala [ParlorNet]`) | 1.1.1 |
 | `rulebooks/fiveinarow` | Five in a Row on a 15 by 15 board (`Five in a Row [ParlorNet]`) | 1.1.1 |
-| `rulebooks/gridwords` | Grid Words, the crossword game, on a parlor only (`Grid Words [ParlorNet]`) | 1.1.1 |
+| `rulebooks/gridwords` | Grid Words, the crossword game, on a parlor only, with the table's own board and letter values (`Grid Words [ParlorNet]`) | 1.2.0 |
 | `rulebooks/rummytile` | Rummy Tile, tile rummy for two, on a parlor only (`Rummy Tile [ParlorNet]`) | 1.1.1 |
 | `rulebooks/cannonfire` | Cannon Fire, two tanks shelling each other, on a parlor only (`Cannon Fire [ParlorNet]`) | 1.1.1 |
 | `rulebooks/backgammon` | Backgammon with the doubling cube, on a parlor only (`Backgammon [ParlorNet]`) | 1.1.1 |
@@ -28,8 +28,8 @@ A Mac Plus or later with System 6.0 or later, and GameMaster 1.0.0. Playing on a
 
 The rulebooks talk to the GameMaster extension of the ParlorNet server (`adapters/gamemaster.py` in the ParlorNet repository), which listens on port 6508. These versions work with the server as of November 2026:
 
-- The ParlorNet rulebook 0.5 opens its connection with `PARLORNET/1`, the first version of ParlorNet's client protocol, and the extension carries every GameMaster connection inside that one connection. From 0.4 the rulebook also names the program and the Mac with the protocol's `CLI PROG` and `CLI MACH`; the extension accepts a rulebook that does not. Version 0.5 adds Backgammon to the games its window starts.
-- The game rulebooks 1.1.1 carry version `0x0111` in their `GMRZ` resource and connect to versions from `0x0100` on. Backgammon starts at 1.1.1 with the others, and plays only with an extension that knows its ID string, `Backgammon [ParlorNet]`. The extension plays a rulebook whose oldest connectable version is at most 1.0.0 and whose own version is at least 1.0.0, and it sends a whole position (`POS` ... `POE`) to rulebooks from 1.1.0, which is what lets a game be resumed.
+- The ParlorNet rulebook 0.6 opens its connection with `PARLORNET/1`, the first version of ParlorNet's client protocol, and the extension carries every GameMaster connection inside that one connection. From 0.4 the rulebook also names the program and the Mac with the protocol's `CLI PROG` and `CLI MACH`; the extension accepts a rulebook that does not. Version 0.5 adds Backgammon to the games its window starts. Version 0.6 knows Grid Words as `gridwords/1 standard` in the invitations and tables the parlor lists.
+- The game rulebooks 1.1.1, which are all of them but Grid Words, carry version `0x0111` in their `GMRZ` resource and connect to versions from `0x0100` on. Grid Words 1.2.0 carries `0x0120` and connects to the same versions. It draws the board and the letter values of the table's ruleset, which the extension sends as `SQ` and `LV`, and it draws a plain board until they come. Backgammon starts at 1.1.1 with the others, and plays only with an extension that knows its ID string, `Backgammon [ParlorNet]`. The extension plays a rulebook whose oldest connectable version is at most 1.0.0 and whose own version is at least 1.0.0, and it sends a whole position (`POS` ... `POE`) to rulebooks from 1.1.0, which is what lets a game be resumed.
 - GameMaster's own Othello, Dots&Boxes and BattleShips rulebooks play through the ParlorNet rulebook too.
 
 A change to the messages the rulebooks and the extension exchange needs a change on both sides, so a new rulebook version and the server change that goes with it are released together.
