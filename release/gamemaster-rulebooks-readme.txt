@@ -19,8 +19,9 @@ ParlorNet      the lobby: sign in, start games, take invitations
 Checkers       Checkers, American rules
 Mancala        Mancala, Kalah rules with four seeds a pit
 Five in a Row  Five in a Row on a 15 by 15 board: five or more in a line wins
-Grid Words     the crossword game, classic rules, standard board; on a parlor
-               only, which deals the tiles and checks the words
+Grid Words     the crossword game, on a parlor only, which deals the tiles,
+               checks the words and sends the table's own board and letter
+               values
 Rummy Tile     tile rummy for two, standard rules; on a parlor only
 Cannon Fire    two tanks shelling each other across a landscape; on a parlor
                only, which flies the shells
